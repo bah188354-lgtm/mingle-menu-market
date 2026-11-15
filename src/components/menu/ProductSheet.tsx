@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Heart, X, Maximize2 } from "lucide-react";
 
-export type ProductDetail = { id: string; name: string; categoryName?: string; price: number; old?: number; img: string; desc: string };
+export type ProductDetail = { id: string; name: string; categoryName?: string | undefined; price: number; old?: number | undefined; img: string; desc: string };
 
 const roundButton = "flex size-11 items-center justify-center rounded-full bg-overlay text-foreground backdrop-blur-md transition hover:scale-105";
 
