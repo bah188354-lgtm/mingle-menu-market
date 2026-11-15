@@ -10,3 +10,4 @@
 Yayınlama istendi. QR kodu yayın için belirlenen misafir menüsü adresini kullanır.
 - [x] Yeni ürün eklerken yalnızca kendi fotoğrafını yükleme (hazır fotoğraflar kaldırıldı)
 - [x] Daha sade ve anlaşılır yönetim paneli
+- [x] Panelde ürünleri tek dokunuşla gizleme/gösterme

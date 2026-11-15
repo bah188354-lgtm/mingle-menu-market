@@ -135,7 +135,7 @@ function Dashboard() {
             </div>
             <div className="mt-3 flex items-center gap-2 border-t border-border pt-3">
               <label className={`mr-auto inline-flex cursor-pointer items-center gap-2 rounded-full py-1 pl-1 pr-3 text-xs font-medium ${i.available ? "bg-success/15 text-success" : "bg-secondary text-muted-foreground"}`}>
-                <Switch aria-label={`${i.name} menüde göster`} checked={i.available} disabled={toggling === i.id} onCheckedChange={(available) => void toggleItem(i, available)} className="data-[state=checked]:bg-success" />
+                <Switch aria-label={`${i.name} menüde göster`} checked={i.available} disabled={toggling === i.id} onCheckedChange={(available) => void toggleItem(i, available)} className="data-[state=checked]:bg-success data-[state=unchecked]:bg-muted-foreground/40" />
                 {i.available ? <Eye className="size-3.5" /> : <EyeOff className="size-3.5" />}{i.available ? "Menüde" : "Gizli"}
               </label>
               <Button size="sm" variant="secondary" aria-label={`${i.name} düzenle`} onClick={() => setEditing(i)}><Pencil />Düzenle</Button>
