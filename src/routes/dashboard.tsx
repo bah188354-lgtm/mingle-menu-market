@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import type { Tables } from "@/integrations/supabase/types";
 import { dashboardQuery } from "@/lib/menu-queries";
-import { saveItem, saveCategory, deleteEntry } from "@/lib/menu.functions";
+import { saveItem, saveCategory, deleteEntry, setItemAvailability } from "@/lib/menu.functions";
 import { itemSchema } from "@/lib/menu-schema";
 import { menuImage } from "@/lib/menu-images";
 import { PhotoUploader } from "@/components/menu/PhotoUploader";
@@ -39,7 +39,8 @@ function Dashboard() {
   useEffect(() => { setMenuUrl(resolvedGuestMenuUrl(window.location.origin)); }, []);
   const { data } = useSuspenseQuery(dashboardQuery);
   const client = useQueryClient();
-  const saveProduct = useServerFn(saveItem); const saveCat = useServerFn(saveCategory); const remove = useServerFn(deleteEntry);
+  const saveProduct = useServerFn(saveItem); const saveCat = useServerFn(saveCategory); const remove = useServerFn(deleteEntry); const setAvailability = useServerFn(setItemAvailability);
+  const [toggling, setToggling] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("items");
   const [search, setSearch] = useState(""); const [filter, setFilter] = useState("");
   const [editing, setEditing] = useState<Partial<Item> | null>(null);
@@ -64,6 +65,13 @@ function Dashboard() {
   async function confirmDelete() {
     if (!deleting) return; setSaving(true);
     try { await remove({ data: deleting }); await refresh(); setDeleting(null); toast.success("Silindi."); } catch (err) { toast.error(err instanceof Error ? err.message : "Silinemedi."); } finally { setSaving(false); }
+  }
+  async function toggleItem(item: Item, available: boolean) {
+    setToggling(item.id);
+    client.setQueryData(dashboardQuery.queryKey, (old) => old ? { ...old, items: old.items.map((i) => i.id === item.id ? { ...i, available } : i) } : old);
+    try { await setAvailability({ data: { id: item.id, available } }); toast.success(available ? `${item.name} menüde gösteriliyor.` : `${item.name} gizlendi.`); }
+    catch { toast.error("Ürün durumu değiştirilemedi."); }
+    finally { await refresh(); setToggling(null); }
   }
   function downloadQr() {
     const svg = qr.current?.querySelector("svg"); if (!svg) return;
@@ -126,7 +134,10 @@ function Dashboard() {
               </div>
             </div>
             <div className="mt-3 flex items-center gap-2 border-t border-border pt-3">
-              <span className={`mr-auto inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs ${i.available ? "bg-success/15 text-success" : "bg-secondary text-muted-foreground"}`}>{i.available ? <Eye className="size-3.5" /> : <EyeOff className="size-3.5" />}{i.available ? "Menüde" : "Gizli"}</span>
+              <label className={`mr-auto inline-flex cursor-pointer items-center gap-2 rounded-full py-1 pl-1 pr-3 text-xs font-medium ${i.available ? "bg-success/15 text-success" : "bg-secondary text-muted-foreground"}`}>
+                <Switch aria-label={`${i.name} menüde göster`} checked={i.available} disabled={toggling === i.id} onCheckedChange={(available) => void toggleItem(i, available)} className="data-[state=checked]:bg-success" />
+                {i.available ? <Eye className="size-3.5" /> : <EyeOff className="size-3.5" />}{i.available ? "Menüde" : "Gizli"}
+              </label>
               <Button size="sm" variant="secondary" aria-label={`${i.name} düzenle`} onClick={() => setEditing(i)}><Pencil />Düzenle</Button>
               <Button size="sm" variant="ghost" aria-label={`${i.name} sil`} className="text-destructive hover:text-destructive" onClick={() => setDeleting({ id: i.id, kind: "item", name: i.name })}><Trash2 />Sil</Button>
             </div>
