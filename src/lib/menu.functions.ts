@@ -60,3 +60,9 @@ export const deleteEntry = createServerFn({ method: "POST" }).inputValidator((in
   if (result.error) throw new Error(data.kind === "category" ? "Önce bu kategorideki ürünleri taşıyın veya silin." : "Ürün silinemedi.");
   return { ok: true };
 });
+export const setItemAvailability = createServerFn({ method: "POST" }).inputValidator((input) => z.object({ id: z.string().min(1), available: z.boolean() }).parse(input)).handler(async ({ data }) => {
+  const client = createMenuClient(process.env['SUPABASE_URL'], process.env['SUPABASE_PUBLISHABLE_KEY']);
+  const result = await client.from("menu_items").update({ available: data.available }).eq("id", data.id).select("id, available").single();
+  if (result.error) throw new Error("Ürün durumu değiştirilemedi.");
+  return result.data;
+});
