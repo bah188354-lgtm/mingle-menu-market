@@ -4,6 +4,7 @@ import { menuQuery } from "@/lib/menu-queries";
 import { menuImage } from "@/lib/menu-images";
 import { useMemo, useState } from "react";
 import { Coffee, Heart, Search, SlidersHorizontal } from "lucide-react";
+import { ProductSheet } from "@/components/menu/ProductSheet";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -37,6 +38,9 @@ function Menu() {
   const [sort, setSort] = useState("default");
   const [showSort, setShowSort] = useState(false);
   const [favs, setFavs] = useState<string[]>([]);
+  const [openId, setOpenId] = useState<string | null>(null);
+  const toggleFav = (id: string) => setFavs((f) => f.includes(id) ? f.filter((x) => x !== id) : [...f, id]);
+  const openItem = ITEMS.find((i) => i.id === openId);
 
   const visible = useMemo(() => {
     const q = query.trim().toLocaleLowerCase("tr");
@@ -95,12 +99,12 @@ function Menu() {
           {visible.map((item) => {
             const fav = favs.includes(item.id);
             return (
-              <article key={item.id} className="rounded-3xl bg-card p-2.5">
+              <article key={item.id} className="card-press cursor-pointer rounded-3xl bg-card p-2.5" role="button" tabIndex={0} aria-label={`${item.name} detayını aç`} onClick={() => setOpenId(item.id)} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpenId(item.id); } }}>
                 <div className="relative">
                   <img src={item.img} alt={item.name} loading="lazy" width={816} height={816}
                     className="aspect-square w-full rounded-2xl object-cover" />
                   <button aria-label="Favori"
-                    onClick={() => setFavs((f) => fav ? f.filter((x) => x !== item.id) : [...f, item.id])}
+                    onClick={(e) => { e.stopPropagation(); toggleFav(item.id); }}
                     className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full bg-overlay text-foreground backdrop-blur">
                     <Heart className={`h-4 w-4 ${fav ? "fill-primary text-primary" : ""}`} />
                   </button>
@@ -117,6 +121,12 @@ function Menu() {
           })}
         </div>
       )}
+      <ProductSheet
+        item={openItem ? { ...openItem, categoryName: data.categories.find((c) => c.id === openItem.category)?.name } : null}
+        fav={openId ? favs.includes(openId) : false}
+        onToggleFav={() => { if (openId) toggleFav(openId); }}
+        onClose={() => setOpenId(null)}
+      />
     </main>
   );
 }

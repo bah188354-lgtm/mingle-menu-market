@@ -4,7 +4,7 @@ import { z } from "zod";
 import type { Database } from "@/integrations/supabase/types";
 import { itemSchema, categorySchema } from "./menu-schema";
 
-const createMenuClient = createServerOnlyFn((url: string | undefined, key: string | undefined) => {
+export const createMenuClient = createServerOnlyFn((url: string | undefined, key: string | undefined) => {
   if (!key || !url) throw new Error("Menü bağlantısı kurulamadı.");
   return createClient<Database>(url, key, {
     auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
