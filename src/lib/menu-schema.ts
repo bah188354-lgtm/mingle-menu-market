@@ -7,7 +7,7 @@ export const itemSchema = z.object({
   description: z.string().trim().max(500),
   price: z.number().finite().nonnegative(),
   old_price: z.number().finite().nonnegative().nullable(),
-  image: z.string().min(1).max(4000000),
+  image: z.string().min(1, "Lütfen ürün fotoğrafı yükleyin.").max(4000000),
   available: z.boolean(),
   position: z.number().int().nonnegative(),
 }).refine((item) => item.old_price === null || item.old_price > item.price, {
