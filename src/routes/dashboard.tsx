@@ -83,7 +83,7 @@ function Dashboard() {
     { id: "categories", label: "Kategoriler", icon: LayoutGrid, count: data.categories.length },
     { id: "qr", label: "QR kod", icon: QrCode },
   ];
-  const newItem = () => setEditing({ available: true, image: "", category_id: filter || data.categories[0]?.id, position: data.items.length + 1 });
+  const newItem = () => setEditing({ available: true, image: "", category_id: filter || data.categories[0]?.id || "", position: data.items.length + 1 });
 
   return <main className="min-h-screen pb-16">
     <header className="sticky top-0 z-20 border-b border-border bg-background/90 backdrop-blur">
