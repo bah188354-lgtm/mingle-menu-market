@@ -76,7 +76,7 @@
 }
 
 :root {
-  --lightbox: oklch(0.08 0 0 / 96%);
+  --lightbox: oklch(0.06 0 0 / 98%);
 }
 
 .photo-lightbox {

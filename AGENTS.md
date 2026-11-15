@@ -34,3 +34,4 @@ use the editor.
 - Keep the guest menu at `/` and filter out unavailable products in its server function; the QR code must target this public menu, never the management or sign-in page.
 - Resolve QR destinations to the current public origin, with the verified deployment URL as the editor-preview fallback; this prevents printed codes from pointing to an editor sign-in wall.
 - Project was imported from GitHub (mingle-at-the-table); the menu data lives in Lovable Cloud tables menu_categories and menu_items.
+- Uploaded product photos go to the private menu-photos storage bucket and are served through /api/public/menu-photo/$name; the workspace blocks public buckets, and this keeps menu data small.
