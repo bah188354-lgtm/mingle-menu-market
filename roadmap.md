@@ -8,3 +8,5 @@
 - [x] Yayınlanan menü adresine yönlenen yazdırılabilir QR kodu
 
 Yayınlama istendi. QR kodu yayın için belirlenen misafir menüsü adresini kullanır.
+- [x] Yeni ürün eklerken yalnızca kendi fotoğrafını yükleme (hazır fotoğraflar kaldırıldı)
+- [x] Daha sade ve anlaşılır yönetim paneli
