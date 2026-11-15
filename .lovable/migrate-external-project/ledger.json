@@ -1,0 +1,58 @@
+[
+ {
+  "capability": "code",
+  "source": "TanStack Start app (guest menu /, dashboard /dashboard, /auth redirect)",
+  "outcome": "copy",
+  "status": "verified",
+  "next_action": "none"
+ },
+ {
+  "capability": "schema",
+  "source": "menu_categories, menu_items (+ unused user_roles/has_role)",
+  "outcome": "migrate",
+  "status": "verified",
+  "next_action": "none"
+ },
+ {
+  "capability": "records",
+  "source": "Seed categories/items from migration; live edits in old database not exported",
+  "outcome": "migrate",
+  "status": "pending",
+  "next_action": "Default menu seeded; ask user for current menu export or skip"
+ },
+ {
+  "capability": "auth",
+  "source": "None in use (passwordless public dashboard by owner request)",
+  "outcome": "not needed",
+  "status": "accepted",
+  "next_action": "none"
+ },
+ {
+  "capability": "authorization",
+  "source": "Public read/write RLS on menu tables (owner-requested)",
+  "outcome": "migrate",
+  "status": "verified",
+  "next_action": "none"
+ },
+ {
+  "capability": "file storage",
+  "source": "Item images stored inline (data URL or built-in key) in menu_items.image",
+  "outcome": "migrate with records",
+  "status": "pending",
+  "next_action": "Comes with record export"
+ },
+ {
+  "capability": "QR cutover",
+  "source": "publishedMenuUrl points to mingle-at-the-table.lovable.app",
+  "outcome": "cutover",
+  "status": "pending",
+  "next_action": "Update after this project is published"
+ },
+ {
+  "capability": "verification",
+  "source": "-",
+  "outcome": "verify",
+  "status": "verified",
+  "next_action": "none"
+ }
+]
