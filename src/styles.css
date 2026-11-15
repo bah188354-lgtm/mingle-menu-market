@@ -74,3 +74,25 @@
   scrollbar-width: none;
   &::-webkit-scrollbar { display: none; }
 }
+
+:root {
+  --lightbox: oklch(0.08 0 0 / 96%);
+}
+
+.photo-lightbox {
+  background-color: var(--lightbox);
+}
+
+.product-photo {
+  animation: product-photo-in 900ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes product-photo-in {
+  from { transform: scale(1.08); }
+  to { transform: scale(1); }
+}
+
+@utility card-press {
+  transition: transform 200ms ease;
+  &:active { transform: scale(0.97); }
+}
