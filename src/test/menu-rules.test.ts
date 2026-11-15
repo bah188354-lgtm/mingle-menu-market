@@ -6,3 +6,10 @@ describe("Menu management rules", () => {
   it("rejects negative prices", () => { expect(itemSchema.safeParse({ ...item, price: -1 }).success).toBe(false); });
   it("rejects an old price below the selling price", () => { expect(itemSchema.safeParse({ ...item, old_price: 60 }).success).toBe(false); });
 });
+describe("New product photo", () => {
+  it("requires an uploaded photo", () => {
+    const result = itemSchema.safeParse({ ...item, image: "" });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.message).toBe("Lütfen ürün fotoğrafı yükleyin.");
+  });
+});
