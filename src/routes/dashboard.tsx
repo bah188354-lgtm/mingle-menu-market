@@ -85,7 +85,8 @@ function Dashboard() {
   }
 
   const categoryName = (id: string) => data.categories.find((c) => c.id === id)?.name ?? "";
-  const products = data.items.filter((i) => (!filter || i.category_id === filter) && i.name.toLocaleLowerCase("tr").includes(search.toLocaleLowerCase("tr")));
+  const hiddenCount = data.items.filter((i) => !i.available).length;
+  const products = data.items.filter((i) => (filter === "hidden" ? !i.available : !filter || i.category_id === filter) && i.name.toLocaleLowerCase("tr").includes(search.toLocaleLowerCase("tr")));
   const tabs: { id: Tab; label: string; icon: typeof Coffee; count?: number }[] = [
     { id: "items", label: "Ürünler", icon: UtensilsCrossed, count: data.items.length },
     { id: "categories", label: "Kategoriler", icon: LayoutGrid, count: data.categories.length },
@@ -122,6 +123,10 @@ function Dashboard() {
         <div className="no-scrollbar -mx-4 mt-3 flex gap-2 overflow-x-auto px-4" role="group" aria-label="Kategori filtresi">
           {[{ id: "", name: "Tümü" }, ...data.categories].map((c) => <button key={c.id || "all"} type="button" onClick={() => setFilter(c.id)}
             className={`shrink-0 rounded-full border px-4 py-1.5 text-sm transition-colors ${filter === c.id ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground hover:text-foreground"}`}>{c.name}</button>)}
+          {hiddenCount > 0 && <button type="button" onClick={() => setFilter("hidden")}
+            className={`flex shrink-0 items-center gap-1.5 rounded-full border px-4 py-1.5 text-sm transition-colors ${filter === "hidden" ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground hover:text-foreground"}`}>
+            <EyeOff className="size-3.5" />Gizli<span className="rounded-full bg-secondary px-1.5 text-xs">{hiddenCount}</span>
+          </button>}
         </div>
         <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {products.map((i) => <article key={i.id} className="flex flex-col rounded-2xl border border-border bg-card p-3">
