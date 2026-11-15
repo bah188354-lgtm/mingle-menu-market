@@ -28,3 +28,9 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+## Application architecture
+
+- Keep menu management at the public `/dashboard` route and use publishable-key server functions with menu-table RLS; this supports credential-free management without exposing privileged account access.
+- Keep the guest menu at `/` and filter out unavailable products in its server function; the QR code must target this public menu, never the management or sign-in page.
+- Resolve QR destinations to the current public origin, with the verified deployment URL as the editor-preview fallback; this prevents printed codes from pointing to an editor sign-in wall.
+- Project was imported from GitHub (mingle-at-the-table); the menu data lives in Lovable Cloud tables menu_categories and menu_items.
