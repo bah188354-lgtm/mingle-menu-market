@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      guest_comments: {
+        Row: {
+          author_name: string
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string
+        }
+        Insert: {
+          author_name?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message: string
+        }
+        Update: {
+          author_name?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+        }
+        Relationships: []
+      }
       menu_categories: {
         Row: {
           id: string
