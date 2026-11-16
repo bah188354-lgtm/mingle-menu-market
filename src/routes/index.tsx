@@ -5,6 +5,7 @@ import { menuImage } from "@/lib/menu-images";
 import { useMemo, useState } from "react";
 import { Coffee, Heart, Search, SlidersHorizontal } from "lucide-react";
 import { ProductSheet } from "@/components/menu/ProductSheet";
+import { CommentBox } from "@/components/menu/CommentBox";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -121,6 +122,7 @@ function Menu() {
           })}
         </div>
       )}
+      <CommentBox />
       <ProductSheet
         item={openItem ? { ...openItem, categoryName: data.categories.find((c) => c.id === openItem.category)?.name } : null}
         fav={openId ? favs.includes(openId) : false}
