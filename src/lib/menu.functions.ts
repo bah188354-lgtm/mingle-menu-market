@@ -2,7 +2,7 @@ import { createServerFn, createServerOnlyFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import type { Database } from "@/integrations/supabase/types";
-import { itemSchema, categorySchema, reviewSchema } from "./menu-schema";
+import { itemSchema, categorySchema, commentSchema } from "./menu-schema";
 
 export const createMenuClient = createServerOnlyFn((url: string | undefined, key: string | undefined) => {
   if (!key || !url) throw new Error("Menü bağlantısı kurulamadı.");
@@ -67,35 +67,29 @@ export const setItemAvailability = createServerFn({ method: "POST" }).inputValid
   return result.data;
 });
 
-// Guest reviews: anyone may add one, but it is always stored unapproved and
-// only approved reviews are returned to the guest menu.
-export const getItemReviews = createServerFn({ method: "GET" }).inputValidator((input) => z.object({ itemId: z.string().uuid() }).parse(input)).handler(async ({ data }) => {
+
+// Guest comments go only to the management panel; the guest menu never lists them.
+export const sendComment = createServerFn({ method: "POST" }).inputValidator((input) => commentSchema.parse(input)).handler(async ({ data }) => {
   const client = createMenuClient(process.env['SUPABASE_URL'], process.env['SUPABASE_PUBLISHABLE_KEY']);
-  const result = await client.from("menu_reviews").select("id, author_name, rating, comment, created_at").eq("item_id", data.itemId).eq("approved", true).order("created_at", { ascending: false }).limit(50);
-  if (result.error) throw new Error("Yorumlar yüklenemedi.");
-  return result.data ?? [];
-});
-export const addReview = createServerFn({ method: "POST" }).inputValidator((input) => reviewSchema.parse(input)).handler(async ({ data }) => {
-  const client = createMenuClient(process.env['SUPABASE_URL'], process.env['SUPABASE_PUBLISHABLE_KEY']);
-  const result = await client.from("menu_reviews").insert({ ...data, approved: false });
+  const result = await client.from("guest_comments").insert({ ...data, is_read: false });
   if (result.error) throw new Error("Yorum gönderilemedi.");
   return { ok: true };
 });
-export const getAllReviews = createServerFn({ method: "GET" }).handler(async () => {
+export const getComments = createServerFn({ method: "GET" }).handler(async () => {
   const client = createMenuClient(process.env['SUPABASE_URL'], process.env['SUPABASE_PUBLISHABLE_KEY']);
-  const result = await client.from("menu_reviews").select("*").order("created_at", { ascending: false }).limit(300);
+  const result = await client.from("guest_comments").select("*").order("created_at", { ascending: false }).limit(500);
   if (result.error) throw new Error("Yorumlar yüklenemedi.");
   return result.data ?? [];
 });
-export const moderateReview = createServerFn({ method: "POST" }).inputValidator((input) => z.object({ id: z.string().uuid(), approved: z.boolean() }).parse(input)).handler(async ({ data }) => {
+export const markComment = createServerFn({ method: "POST" }).inputValidator((input) => z.object({ id: z.string().uuid(), is_read: z.boolean() }).parse(input)).handler(async ({ data }) => {
   const client = createMenuClient(process.env['SUPABASE_URL'], process.env['SUPABASE_PUBLISHABLE_KEY']);
-  const result = await client.from("menu_reviews").update({ approved: data.approved }).eq("id", data.id).select("id").single();
+  const result = await client.from("guest_comments").update({ is_read: data.is_read }).eq("id", data.id).select("id").single();
   if (result.error) throw new Error("Yorum güncellenemedi.");
   return { ok: true };
 });
-export const deleteReview = createServerFn({ method: "POST" }).inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input)).handler(async ({ data }) => {
+export const deleteComment = createServerFn({ method: "POST" }).inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input)).handler(async ({ data }) => {
   const client = createMenuClient(process.env['SUPABASE_URL'], process.env['SUPABASE_PUBLISHABLE_KEY']);
-  const result = await client.from("menu_reviews").delete().eq("id", data.id).select("id").single();
+  const result = await client.from("guest_comments").delete().eq("id", data.id).select("id").single();
   if (result.error) throw new Error("Yorum silinemedi.");
   return { ok: true };
 });
