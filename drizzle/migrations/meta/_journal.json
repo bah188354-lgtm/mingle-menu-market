@@ -15,6 +15,13 @@
       "when": 1794735263618,
       "tag": "0001_menu_photo_storage_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794807404729,
+      "tag": "0002_create_menu_reviews",
+      "breakpoints": true
     }
   ]
 }
