@@ -97,7 +97,7 @@ function Dashboard() {
   const categoryName = (id: string) => data.categories.find((c) => c.id === id)?.name ?? "";
   const hiddenCount = data.items.filter((i) => !i.available).length;
   const products = data.items.filter((i) => (filter === "hidden" ? !i.available : !filter || i.category_id === filter) && i.name.toLocaleLowerCase("tr").includes(search.toLocaleLowerCase("tr")));
-  const tabs: { id: Tab; label: string; icon: typeof Coffee; count?: number }[] = [
+  const tabs: { id: Tab; label: string; icon: typeof Coffee; count?: number | undefined }[] = [
     { id: "items", label: "Ürünler", icon: UtensilsCrossed, count: data.items.length },
     { id: "categories", label: "Kategoriler", icon: LayoutGrid, count: data.categories.length },
     { id: "comments", label: "Yorumlar", icon: MessageSquareText, count: comments.data?.filter((c) => !c.is_read).length || undefined },
