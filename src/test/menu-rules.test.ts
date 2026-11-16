@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { itemSchema } from "@/lib/menu-schema";
+import { itemSchema, commentSchema } from "@/lib/menu-schema";
 const item = { name: "Espresso", category_id: "sicak", description: "", price: 65, old_price: 80, image: "espresso", available: true, position: 1 };
 describe("Menu management rules", () => {
   it("preserves entered prices", () => { expect(itemSchema.parse(item).price).toBe(65); });
@@ -12,4 +12,8 @@ describe("New product photo", () => {
     expect(result.success).toBe(false);
     expect(result.error?.issues[0]?.message).toBe("Lütfen ürün fotoğrafı yükleyin.");
   });
+});
+describe("Guest comments", () => {
+  it("requires a written comment", () => { expect(commentSchema.safeParse({ author_name: "", message: "   " }).success).toBe(false); });
+  it("allows sending without a name", () => { expect(commentSchema.safeParse({ author_name: "", message: "Teşekkürler" }).success).toBe(true); });
 });

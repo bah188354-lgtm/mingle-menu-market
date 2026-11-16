@@ -11,3 +11,4 @@ Yayınlama istendi. QR kodu yayın için belirlenen misafir menüsü adresini ku
 - [x] Yeni ürün eklerken yalnızca kendi fotoğrafını yükleme (hazır fotoğraflar kaldırıldı)
 - [x] Daha sade ve anlaşılır yönetim paneli
 - [x] Panelde ürünleri tek dokunuşla gizleme/gösterme
+- [x] Misafir yorum kutusu: herkes yazabilir, yorumlar yalnızca yönetim panelinde görünür

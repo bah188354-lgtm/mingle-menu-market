@@ -1,16 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
-import { Coffee, LayoutGrid, UtensilsCrossed, QrCode, Plus, Pencil, Trash2, Download, Copy, Search, Eye, EyeOff, Check, ImageOff } from "lucide-react";
+import { Coffee, LayoutGrid, UtensilsCrossed, QrCode, Plus, Pencil, Trash2, Download, Copy, Search, Eye, EyeOff, Check, ImageOff, MessageSquareText, MailOpen, Mail } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import type { Tables } from "@/integrations/supabase/types";
-import { dashboardQuery } from "@/lib/menu-queries";
-import { saveItem, saveCategory, deleteEntry, setItemAvailability } from "@/lib/menu.functions";
+import { dashboardQuery, commentsQuery } from "@/lib/menu-queries";
+import { saveItem, saveCategory, deleteEntry, setItemAvailability, markComment, deleteComment } from "@/lib/menu.functions";
 import { itemSchema } from "@/lib/menu-schema";
 import { menuImage } from "@/lib/menu-images";
 import { PhotoUploader } from "@/components/menu/PhotoUploader";
@@ -27,7 +27,7 @@ export const Route = createFileRoute("/dashboard")({
 
 type Item = Tables<"menu_items">;
 type Category = Tables<"menu_categories">;
-type Tab = "items" | "categories" | "qr";
+type Tab = "items" | "categories" | "comments" | "qr";
 const field = "w-full rounded-xl border border-border bg-input px-3.5 py-3 text-base outline-none transition focus:border-primary focus:ring-1 focus:ring-ring sm:text-sm";
 
 function Field({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
@@ -40,6 +40,8 @@ function Dashboard() {
   const { data } = useSuspenseQuery(dashboardQuery);
   const client = useQueryClient();
   const saveProduct = useServerFn(saveItem); const saveCat = useServerFn(saveCategory); const remove = useServerFn(deleteEntry); const setAvailability = useServerFn(setItemAvailability);
+  const comments = useQuery({ ...commentsQuery, refetchInterval: 30000 });
+  const markRead = useServerFn(markComment); const removeComment = useServerFn(deleteComment);
   const [toggling, setToggling] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("items");
   const [search, setSearch] = useState(""); const [filter, setFilter] = useState("");
@@ -73,6 +75,14 @@ function Dashboard() {
     catch { toast.error("Ürün durumu değiştirilemedi."); }
     finally { await refresh(); setToggling(null); }
   }
+  async function setRead(id: string, is_read: boolean) {
+    client.setQueryData(commentsQuery.queryKey, (old) => old?.map((c) => c.id === id ? { ...c, is_read } : c));
+    try { await markRead({ data: { id, is_read } }); } catch { toast.error("Yorum güncellenemedi."); }
+    finally { await client.invalidateQueries({ queryKey: ["comments"] }); }
+  }
+  async function removeOne(id: string) {
+    try { await removeComment({ data: { id } }); await client.invalidateQueries({ queryKey: ["comments"] }); toast.success("Yorum silindi."); } catch { toast.error("Yorum silinemedi."); }
+  }
   function downloadQr() {
     const svg = qr.current?.querySelector("svg"); if (!svg) return;
     const exported = svg.cloneNode(true);
@@ -87,9 +97,10 @@ function Dashboard() {
   const categoryName = (id: string) => data.categories.find((c) => c.id === id)?.name ?? "";
   const hiddenCount = data.items.filter((i) => !i.available).length;
   const products = data.items.filter((i) => (filter === "hidden" ? !i.available : !filter || i.category_id === filter) && i.name.toLocaleLowerCase("tr").includes(search.toLocaleLowerCase("tr")));
-  const tabs: { id: Tab; label: string; icon: typeof Coffee; count?: number }[] = [
+  const tabs: { id: Tab; label: string; icon: typeof Coffee; count?: number | undefined }[] = [
     { id: "items", label: "Ürünler", icon: UtensilsCrossed, count: data.items.length },
     { id: "categories", label: "Kategoriler", icon: LayoutGrid, count: data.categories.length },
+    { id: "comments", label: "Yorumlar", icon: MessageSquareText, count: comments.data?.filter((c) => !c.is_read).length || undefined },
     { id: "qr", label: "QR kod", icon: QrCode },
   ];
   const newItem = () => setEditing({ available: true, image: "", category_id: filter || data.categories[0]?.id || "", position: data.items.length + 1 });
@@ -103,11 +114,11 @@ function Dashboard() {
         </div>
         <Button variant="outline" size="sm" asChild><Link to="/"><Eye />Menüyü gör</Link></Button>
       </div>
-      <nav className="mx-auto flex max-w-5xl gap-1 px-4 pb-3" aria-label="Panel bölümleri">
+      <nav className="mx-auto grid max-w-5xl grid-cols-4 gap-1 px-4 pb-3" aria-label="Panel bölümleri">
         {tabs.map((t) => <button key={t.id} type="button" onClick={() => setTab(t.id)} aria-current={tab === t.id ? "page" : undefined}
-          className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${tab === t.id ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:text-foreground"}`}>
-          <t.icon className="size-4" /><span>{t.label}</span>
-          {t.count !== undefined && <span className={`rounded-full px-1.5 text-xs ${tab === t.id ? "bg-primary-foreground/15" : "bg-secondary"}`}>{t.count}</span>}
+          className={`relative flex min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-xs sm:flex-row sm:gap-2 sm:px-3 sm:py-2.5 sm:text-sm font-medium transition-colors ${tab === t.id ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:text-foreground"}`}>
+          <t.icon className="size-4 shrink-0" /><span className="whitespace-nowrap">{t.label}</span>
+          {t.count !== undefined && <span className={`absolute right-1 top-1 rounded-full px-1.5 text-[10px] sm:static sm:text-xs ${tab === t.id ? "bg-primary-foreground/15" : "bg-secondary"}`}>{t.count}</span>}
         </button>)}
       </nav>
     </header>
@@ -164,6 +175,28 @@ function Dashboard() {
             <Button size="icon" variant="ghost" title="Kategoriyi sil" aria-label={`${c.name} sil`} className="text-destructive hover:text-destructive" onClick={() => setDeleting({ id: c.id, kind: "category", name: c.name })}><Trash2 /></Button>
           </article>)}
           {!data.categories.length && <p className="rounded-2xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">Henüz kategori yok.</p>}
+        </div>
+      </>}
+
+      {tab === "comments" && <>
+        <h1 className="text-2xl font-semibold">Yorumlar</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Misafirlerin gönderdiği yorumlar. Bunları yalnızca siz görürsünüz.</p>
+        <div className="mt-6 space-y-3">
+          {comments.isLoading && <p className="text-sm text-muted-foreground">Yükleniyor...</p>}
+          {comments.isError && <p className="text-sm text-destructive">Yorumlar yüklenemedi.</p>}
+          {comments.data?.map((c) => <article key={c.id} className={`rounded-2xl border p-4 ${c.is_read ? "border-border bg-card/60" : "border-primary/40 bg-card"}`}>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              {!c.is_read && <span className="rounded-full bg-primary px-2 py-0.5 text-[11px] font-medium text-primary-foreground">Yeni</span>}
+              <h2 className="font-medium">{c.author_name || "İsimsiz misafir"}</h2>
+              <span className="text-xs text-muted-foreground">{new Date(c.created_at).toLocaleString("tr-TR", { dateStyle: "medium", timeStyle: "short" })}</span>
+            </div>
+            <p className="mt-2 whitespace-pre-wrap break-words text-sm">{c.message}</p>
+            <div className="mt-3 flex gap-2 border-t border-border pt-3">
+              <Button size="sm" variant="secondary" onClick={() => void setRead(c.id, !c.is_read)}>{c.is_read ? <><Mail />Okunmadı yap</> : <><MailOpen />Okundu</>}</Button>
+              <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => void removeOne(c.id)}><Trash2 />Sil</Button>
+            </div>
+          </article>)}
+          {comments.data && !comments.data.length && <p className="rounded-2xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">Henüz yorum yok.</p>}
         </div>
       </>}
 
