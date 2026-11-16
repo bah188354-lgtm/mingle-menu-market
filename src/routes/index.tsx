@@ -6,6 +6,8 @@ import { useMemo, useState } from "react";
 import { Coffee, Heart, Search, SlidersHorizontal } from "lucide-react";
 import { ProductSheet } from "@/components/menu/ProductSheet";
 import { CommentBox } from "@/components/menu/CommentBox";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { X } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -39,6 +41,7 @@ function Menu() {
   const [sort, setSort] = useState("default");
   const [showSort, setShowSort] = useState(false);
   const [favs, setFavs] = useState<string[]>([]);
+  const [wheel, setWheel] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
   const toggleFav = (id: string) => setFavs((f) => f.includes(id) ? f.filter((x) => x !== id) : [...f, id]);
   const openItem = ITEMS.find((i) => i.id === openId);
@@ -56,6 +59,7 @@ function Menu() {
   return (
     <main className="mx-auto min-h-screen w-full max-w-lg px-4 pb-10">
       <header className="relative -mx-4 flex h-44 items-center justify-center rounded-b-3xl bg-cream">
+        <button type="button" onClick={() => setWheel(true)} className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow">🎡 Şans Çarkı</button>
         <div className="flex h-16 w-16 items-center justify-center rounded-full border border-cream-foreground/50 text-cream-foreground">
           <Coffee className="h-8 w-8" strokeWidth={1.25} />
         </div>
@@ -123,6 +127,16 @@ function Menu() {
         </div>
       )}
       <CommentBox />
+      <DialogPrimitive.Root open={wheel} onOpenChange={setWheel}>
+        <DialogPrimitive.Portal>
+          <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-overlay backdrop-blur-sm" />
+          <DialogPrimitive.Content aria-describedby={undefined} className="fixed inset-3 z-50 mx-auto max-w-lg overflow-hidden rounded-3xl bg-card shadow-2xl outline-none">
+            <DialogPrimitive.Title className="sr-only">Şans Çarkı</DialogPrimitive.Title>
+            <DialogPrimitive.Close aria-label="Kapat" className="absolute right-3 top-3 z-10 flex size-9 items-center justify-center rounded-full bg-overlay text-foreground backdrop-blur"><X className="size-4" /></DialogPrimitive.Close>
+            <iframe src="/cark.html" title="Şans Çarkı" className="h-full w-full border-0" />
+          </DialogPrimitive.Content>
+        </DialogPrimitive.Portal>
+      </DialogPrimitive.Root>
       <ProductSheet
         item={openItem ? { ...openItem, categoryName: data.categories.find((c) => c.id === openItem.category)?.name } : null}
         fav={openId ? favs.includes(openId) : false}

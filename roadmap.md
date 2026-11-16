@@ -12,3 +12,4 @@ Yayınlama istendi. QR kodu yayın için belirlenen misafir menüsü adresini ku
 - [x] Daha sade ve anlaşılır yönetim paneli
 - [x] Panelde ürünleri tek dokunuşla gizleme/gösterme
 - [x] Misafir yorum kutusu: herkes yazabilir, yorumlar yalnızca yönetim panelinde görünür
+- [x] Logonun solunda "Şans Çarkı" düğmesi, dokununca çark açılır
