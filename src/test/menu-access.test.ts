@@ -40,7 +40,7 @@ vi.mock("@supabase/supabase-js", () => ({
   }),
 }));
 
-import { getDashboard, getMenu, saveCategory, saveItem, deleteEntry } from "@/lib/menu.functions";
+import { getDashboard, getMenu, saveCategory, saveItem, deleteEntry, sendComment } from "@/lib/menu.functions";
 
 beforeEach(() => {
   vi.stubEnv("SUPABASE_URL", "https://database.example.test");
@@ -88,5 +88,15 @@ describe("Passwordless menu access", () => {
   it("uses the published guest menu for QR codes viewed in the editor", () => {
     expect(resolvedGuestMenuUrl("https://id-preview--example.lovable.app")).toBe("https://mingle-at-the-table.lovable.app/");
     expect(resolvedGuestMenuUrl("http://localhost:8080")).toBe("https://mingle-at-the-table.lovable.app/");
+  });
+
+  it("stores guest comments as unread for the management panel", async () => {
+    await expect(sendComment({ data: { author_name: "Ayşe", message: "Harika kahve" } })).resolves.toEqual({ ok: true });
+    expect(database.writes).toHaveBeenCalledWith("guest_comments", "insert", { author_name: "Ayşe", message: "Harika kahve", is_read: false });
+  });
+
+  it("never returns guest comments to the public menu", async () => {
+    const result = await getMenu();
+    expect(Object.keys(result).sort()).toEqual(["categories", "items"]);
   });
 });
