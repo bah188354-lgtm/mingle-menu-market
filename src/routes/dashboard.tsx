@@ -114,11 +114,11 @@ function Dashboard() {
         </div>
         <Button variant="outline" size="sm" asChild><Link to="/"><Eye />Menüyü gör</Link></Button>
       </div>
-      <nav className="no-scrollbar mx-auto flex max-w-5xl gap-1 overflow-x-auto px-4 pb-3" aria-label="Panel bölümleri">
+      <nav className="mx-auto grid max-w-5xl grid-cols-4 gap-1 px-4 pb-3" aria-label="Panel bölümleri">
         {tabs.map((t) => <button key={t.id} type="button" onClick={() => setTab(t.id)} aria-current={tab === t.id ? "page" : undefined}
-          className={`flex flex-1 shrink-0 items-center justify-center gap-1.5 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${tab === t.id ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:text-foreground"}`}>
+          className={`relative flex min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-xs sm:flex-row sm:gap-2 sm:px-3 sm:py-2.5 sm:text-sm font-medium transition-colors ${tab === t.id ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:text-foreground"}`}>
           <t.icon className="size-4 shrink-0" /><span className="whitespace-nowrap">{t.label}</span>
-          {t.count !== undefined && <span className={`rounded-full px-1.5 text-xs ${tab === t.id ? "bg-primary-foreground/15" : "bg-secondary"}`}>{t.count}</span>}
+          {t.count !== undefined && <span className={`absolute right-1 top-1 rounded-full px-1.5 text-[10px] sm:static sm:text-xs ${tab === t.id ? "bg-primary-foreground/15" : "bg-secondary"}`}>{t.count}</span>}
         </button>)}
       </nav>
     </header>
